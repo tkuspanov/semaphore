@@ -1,0 +1,64 @@
+- name: "Install the repository"
+  ansible.builtin.yum:
+    name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    update_cache: true
+    disable_gpg_check: true
+
+- name: "Install postgres"
+  ansible.builtin.yum:
+    name: "{{ postgresql_packages }}"
+    state: present
+    update_cache: true
+
+- name: "Install lib"
+  ansible.builtin.yum:
+    name: "python-psycopg2"
+    state: present
+    update_cache: true
+
+- name: Ensure PostgreSQL data directory exists.
+  file:
+    path: "{{ postgresql_data_dir }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 700
+
+- name: Check if PostgreSQL database is initialized.
+  stat:
+    path: "{{ postgresql_data_dir }}/PG_VERSION"
+  register: pgdata_dir_version
+
+- name: Ensure PostgreSQL database is initialized.
+  command: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+  when: not pgdata_dir_version.stat.exists
+  become: true
+  become_user: "{{ postgresql_user }}"
+
+- name: Ensure PostgreSQL is started and enabled on boot.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: "{{ postgresql_service_state }}"
+    enabled: "{{ postgresql_service_enabled }}"
+
+- name: Configure pg_hba.conf.
+  template:
+    src: "files/pg_hba.conf.j2"
+    dest: "{{ postgresql_config_path }}/pg_hba.conf"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 600
+  notify: restart postgresql
+  when: postgresql_hba_entries | length > 0
+
+- name: "Create db user for Semaphore"
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    login_host: "{{ db_host }}"
+
+- name: "Create db for Semaphore"
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+    login_host: "{{ db_host }}"
