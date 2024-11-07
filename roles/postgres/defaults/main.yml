@@ -6,7 +6,6 @@ postgresql_packages:
 - postgresql17
 - postgresql17-server
 - postgresql17-contrib
-postgresql_restarted_state: "restarted"
 postgresql_hba_entries:
 - { type: local, database: all, user: postgres, auth_method: peer }
 - { type: local, database: all, user: all, auth_method: peer }
