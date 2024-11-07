@@ -16,7 +16,7 @@
     state: present
     update_cache: true
 
-- name: Ensure PostgreSQL data directory exists.
+- name: "Ensure PostgreSQL data directory exists"
   file:
     path: "{{ postgresql_data_dir }}"
     owner: "{{ postgresql_user }}"
@@ -24,24 +24,24 @@
     state: directory
     mode: 700
 
-- name: Check if PostgreSQL database is initialized.
+- name: "Check if PostgreSQL database is initialized"
   stat:
     path: "{{ postgresql_data_dir }}/PG_VERSION"
   register: pgdata_dir_version
 
-- name: Ensure PostgreSQL database is initialized.
+- name: "Ensure PostgreSQL database is initialized"
   command: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
   when: not pgdata_dir_version.stat.exists
   become: true
   become_user: "{{ postgresql_user }}"
 
-- name: Ensure PostgreSQL is started and enabled on boot.
+- name: "Ensure PostgreSQL is started and enabled on boot"
   service:
     name: "{{ postgresql_daemon }}"
     state: "{{ postgresql_service_state }}"
     enabled: "{{ postgresql_service_enabled }}"
 
-- name: Configure pg_hba.conf.
+- name: "Configure pg_hba.conf"
   template:
     src: "files/pg_hba.conf.j2"
     dest: "{{ postgresql_config_path }}/pg_hba.conf"
