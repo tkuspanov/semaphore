@@ -1,5 +1,3 @@
-postgresql_user: postgres
-postgresql_group: postgres
 postgresql_data_dir: "/var/lib/pgsql/17/data/"
 postgresql_bin_path: "/usr/pgsql-17/bin"
 postgresql_config_path: "/var/lib/pgsql/17/data/"
@@ -26,8 +24,6 @@ postgresql_hba_entries:
     address: '::1/128',
     auth_method: "md5"
   }
-postgresql_service_state: started
-postgresql_service_enabled: true
 db_user: "semaphore"
 db_password: "password"
 db_name: "semaphore"
