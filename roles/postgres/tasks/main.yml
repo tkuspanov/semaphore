@@ -19,8 +19,8 @@
 - name: "Ensure PostgreSQL data directory exists"
   file:
     path: "{{ postgresql_data_dir }}"
-    owner: "{{ postgresql_user }}"
-    group: "{{ postgresql_group }}"
+    owner: "postgres"
+    group: "postgres"
     state: directory
     mode: 700
 
@@ -38,15 +38,15 @@
 - name: "Ensure PostgreSQL is started and enabled on boot"
   service:
     name: "{{ postgresql_daemon }}"
-    state: "{{ postgresql_service_state }}"
-    enabled: "{{ postgresql_service_enabled }}"
+    state: started
+    enabled: true
 
 - name: "Configure pg_hba.conf"
   template:
     src: "files/pg_hba.conf.j2"
     dest: "{{ postgresql_config_path }}/pg_hba.conf"
-    owner: "{{ postgresql_user }}"
-    group: "{{ postgresql_group }}"
+    owner: "postgres"
+    group: "postgres"
     mode: 600
   notify: restart postgresql
   when: postgresql_hba_entries | length > 0
